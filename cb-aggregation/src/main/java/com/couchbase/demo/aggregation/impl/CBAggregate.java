@@ -47,7 +47,7 @@ public class CBAggregate implements IAggregate {
         this.result = currResult;
     }
     
-    public Observable<IAggregate> persist() {
+    public Observable<CBAggregate> persist() {
         
         String key = this.aggrId + "::" + this.recordId;
         
@@ -59,14 +59,14 @@ public class CBAggregate implements IAggregate {
     }
     
     
-    public Observable<IAggregate> get() {
-        
-        //TODO: If not existent then create
-        
+    public Observable<CBAggregate> get() {
+         
          String key = this.aggrId + "::" + this.recordId;
          
-         return BucketFactory.getAsyncBucket().get(key).map(d -> d.content().getDouble("value"))
-                                                .map(val -> { this.setResult(val); return this;});
+         return BucketFactory.getAsyncBucket().get(key)
+                 .map(d -> d.content().getDouble("value"))
+                 .map(val -> { this.setResult(val); return this;})
+                 .onErrorResumeNext(e -> this.persist());
         
         
     }
