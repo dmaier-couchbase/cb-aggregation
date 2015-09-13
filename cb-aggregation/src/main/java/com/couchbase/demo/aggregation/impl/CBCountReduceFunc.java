@@ -9,7 +9,7 @@ import rx.Observable;
  *
  * @author David Maier <david.maier at couchbase.com>
  */
-public class CountByUserReduceFunc implements IReduceFunc {
+public class CBCountReduceFunc implements IReduceFunc {
     
     @Override
     public IAggregate reduce(IAggregate old, IRecord record)  {
