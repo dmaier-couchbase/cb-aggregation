@@ -56,5 +56,11 @@ public class FileSource implements ISource {
         
         
     }  
+
+    @Override
+    public ISchema getSchema() {
+        
+        return this.schema;
+    }
     
 }

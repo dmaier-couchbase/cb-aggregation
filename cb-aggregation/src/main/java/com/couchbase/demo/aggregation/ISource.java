@@ -11,4 +11,6 @@ public interface ISource {
    
     public Observable<IRecord> retrieve() throws Exception;
     
+    public ISchema getSchema();
+    
 }
