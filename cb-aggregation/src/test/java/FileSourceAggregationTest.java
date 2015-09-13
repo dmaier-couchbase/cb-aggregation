@@ -1,4 +1,5 @@
 import com.couchbase.client.java.Bucket;
+import com.couchbase.demo.aggregation.IAggregate;
 import com.couchbase.demo.aggregation.ISchema;
 import com.couchbase.demo.aggregation.conn.BucketFactory;
 import com.couchbase.demo.aggregation.impl.CBAggregate;
@@ -43,10 +44,19 @@ public class FileSourceAggregationTest {
         
         FileSource fs = new FileSource("test.csv", schema);
                 
+        //Perform the aggregation
         fs.retrieve().map(r -> new IdentifyByUidMapFunc().map(r))
                      .flatMap(r -> new CBCountReduceFunc().reduce(r))
                      .toBlocking()
                      .last();
+        
+        //Read the aggregation resul for one record id
+        IAggregate agg = new CBAggregate(CBCountReduceFunc.AGGR_ID, "dmaier")
+                .get()
+                .toBlocking()
+                .single();
+        
+        LOG.info("value = " + agg.getResult());
  
     }
     
