@@ -47,6 +47,11 @@ public class CBAggregate implements IAggregate {
         this.result = currResult;
     }
     
+    /**
+     * Persist the aggregate to Couchbase
+     * 
+     * @return 
+     */
     public Observable<CBAggregate> persist() {
         
         String key = this.aggrId + "::" + this.recordId;
@@ -58,11 +63,17 @@ public class CBAggregate implements IAggregate {
                 .map(d -> {return this;});
     }
     
-    
+    /**
+     * Get the aggregate from Couchbase, if it is not yet existent then
+     * create it.
+     * 
+     * @return 
+     */
     public Observable<CBAggregate> get() {
          
          String key = this.aggrId + "::" + this.recordId;
          
+         //TODO: Check for error type
          return BucketFactory.getAsyncBucket().get(key)
                  .map(d -> d.content().getDouble("value"))
                  .map(val -> { this.setResult(val); return this;})
@@ -70,7 +81,12 @@ public class CBAggregate implements IAggregate {
         
         
     }
-      
+    
+    /**
+     * Create the JSON for this aggregate
+     * 
+     * @return 
+     */
     private JsonObject toJson()
     {
         JsonObject obj = JsonObject.empty();

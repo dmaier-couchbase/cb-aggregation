@@ -11,6 +11,8 @@ import rx.Observable;
  */
 public class CBCountReduceFunc implements IReduceFunc {
     
+    public static String AGGR_ID = "count";
+    
     @Override
     public IAggregate reduce(IAggregate old, IRecord record)  {
     
@@ -28,4 +30,16 @@ public class CBCountReduceFunc implements IReduceFunc {
                             return reduced;})
                             .flatMap( a -> ((CBAggregate) a).persist() );
     }
+    
+    /**
+     * Using the constant aggregation identifier
+     * 
+     * @param record
+     * @return 
+     */
+    public Observable<IAggregate> reduce(IRecord record) {
+        
+        return reduce(AGGR_ID, record);
+    }
+    
 }

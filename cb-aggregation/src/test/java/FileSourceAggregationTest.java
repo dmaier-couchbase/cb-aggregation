@@ -44,7 +44,7 @@ public class FileSourceAggregationTest {
         FileSource fs = new FileSource("test.csv", schema);
                 
         fs.retrieve().map(r -> new IdentifyByUidMapFunc().map(r))
-                     .flatMap(r -> new CBCountReduceFunc().reduce("count", r))
+                     .flatMap(r -> new CBCountReduceFunc().reduce(r))
                      .toBlocking()
                      .last();
  
