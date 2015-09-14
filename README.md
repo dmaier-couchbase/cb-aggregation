@@ -26,13 +26,13 @@ We also need to define a Source to retrieve the data from. A source provides rec
 * Source
  * e.g. FileSource
 
-The stream (to be processed) is then filled with records from multiple sources. It's just important that they follow the same schema. In our example we will just read from multiple files in parallel and fill an Observable from there.
+It's just important that the records those are provided by the Source are following the schema. In our example we will just read from a file and fill our stream from there.
 
-Based on this we need to define what the Id of the record is. Therefore a Map function is used which enriches the Record with an Id which is a String. So the record is mapped to an Id which is a string:
+Based on this we need to define what the Id of the record is. Therefore a Map function is used which enriches the Record with an Id. For our example an Id is a String.
 
 * Record MapFunc(Record r)
 
-Based on this Id and other properties we want to perform an aggregation. For this purpose a Reduce function is required. The Reduce Function returns in our example everytime a numeric result (as part of the Aggregate). The aggregation result is stored in Couchbase based on the  previously determined record identifier and an aggregate identifier.
+Based on this Id and other properties we want to perform an aggregation. For this purpose a Reduce function is required. The Reduce Function returns in our example everytime a numeric result. The aggregation result is stored in Couchbase based on the  previously determined record identifier and an aggregation identifier.
 
 * Aggregate
  * String aggrId
