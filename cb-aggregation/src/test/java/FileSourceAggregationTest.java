@@ -42,7 +42,7 @@ public class FileSourceAggregationTest {
         schema.add("token", Schema.TYPE_STRING);
         schema.add("elapsed", Schema.TYPE_NUM);
         
-        FileSource fs = new FileSource("test.csv", schema);
+        FileSource fs = new FileSource("/Users/david/Projects/Git/dmaier-couchbase/cb-aggregation/cb-aggregation/src/main/java/test.csv", schema);
                 
         //Perform the aggregation
         fs.retrieve().map(r -> new IdentifyByUidMapFunc().map(r))
@@ -50,13 +50,14 @@ public class FileSourceAggregationTest {
                      .toBlocking()
                      .last();
         
+        
         //Read the aggregation resul for one record id
         IAggregate agg = new CBAggregate(CBCountReduceFunc.AGGR_ID, "dmaier")
                 .get()
                 .toBlocking()
                 .single();
         
-        LOG.info("value = " + agg.getResult());
+        LOG.log(Level.INFO, "value = {0}", agg.getResult());
  
     }
     

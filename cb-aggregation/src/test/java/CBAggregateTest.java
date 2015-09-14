@@ -11,7 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
 
 /**
  *
@@ -37,9 +37,19 @@ public class CBAggregateTest {
     public void testGetAggregate() {
     
         CBAggregate aggr  = new CBAggregate("count", "dmaier");
+        aggr.setResult(5);
         aggr.persist().toBlocking().single();
         
         LOG.log(Level.INFO, "value = {0}", aggr.get().toBlocking().single().getResult());
     
+    }
+    
+    @Test
+    public void testGetNonExistentAggregate()
+    {
+        CBAggregate aggr  = new CBAggregate("count", "dostrovsky");
+        
+        LOG.log(Level.INFO, "value = {0}", aggr.get().toBlocking().single().getResult());
+
     }
 }

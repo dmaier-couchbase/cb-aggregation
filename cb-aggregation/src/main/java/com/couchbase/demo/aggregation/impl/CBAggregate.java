@@ -5,6 +5,7 @@ import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.demo.aggregation.IAggregate;
 import com.couchbase.demo.aggregation.conn.BucketFactory;
+import java.util.logging.Logger;
 import rx.Observable;
 
 /**
@@ -13,6 +14,8 @@ import rx.Observable;
  */
 public class CBAggregate implements IAggregate {
 
+    private static Logger LOG = Logger.getLogger(CBAggregate.class.getName());
+    
     private final String aggrId;
     private final String recordId;
     private double result = 0;
@@ -48,20 +51,17 @@ public class CBAggregate implements IAggregate {
     }
     
     /**
-     * Persist the aggregate to Couchbase
+     * Persist the aggregate to Couchbase and return an aggregate
      * 
      * @return 
      */
     public Observable<CBAggregate> persist() {
         
-        String key = this.aggrId + "::" + this.recordId;
-        
-        JsonDocument doc = JsonDocument.create(key, toJson());
-        
         return BucketFactory.getAsyncBucket()
-                .upsert(doc)
+                .upsert(toJson())
                 .map(d -> {return this;});
     }
+    
     
     /**
      * Get the aggregate from Couchbase, if it is not yet existent then
@@ -71,15 +71,17 @@ public class CBAggregate implements IAggregate {
      */
     public Observable<CBAggregate> get() {
          
-         String key = this.aggrId + "::" + this.recordId;
-         
-         //TODO: Check for error type
-         return BucketFactory.getAsyncBucket().get(key)
-                 .map(d -> d.content().getDouble("value"))
-                 .map(val -> { this.setResult(val); return this;})
-                 .onErrorResumeNext(e -> this.persist());
-        
-        
+        String key = this.aggrId + "::" + this.recordId;
+
+        //Create the document if not existent
+        return BucketFactory.getAsyncBucket().get(key)
+                .defaultIfEmpty(null)
+                .map(d -> d.content().getDouble("value"))
+                .onErrorResumeNext(e -> this.persist().map(a -> a.getResult()))
+                .map(val -> {
+                    this.setResult(val);
+                    return this;
+                });  
     }
     
     /**
@@ -87,12 +89,14 @@ public class CBAggregate implements IAggregate {
      * 
      * @return 
      */
-    private JsonObject toJson()
+    private JsonDocument toJson()
     {
+        String key = this.aggrId + "::" + this.recordId;
+       
         JsonObject obj = JsonObject.empty();
         obj.put("value", this.result);
         
-        return obj;
+        return JsonDocument.create(key, obj);
     }
   
     
