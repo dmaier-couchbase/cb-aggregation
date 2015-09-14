@@ -71,8 +71,11 @@ are counted.
                      .flatMap(r -> new CBCountReduceFunc().reduce(r))
                      .toBlocking()
                      .last();
-        
-        
+```
+
+The counting happens in parallel. The synchronization happens implicitely by using Couchbases optimistic concurrency handling (CAS). The final aggregation result is stored in Couchbase and can be retrieved by using:
+
+```
         //Read the aggregation result for 2 record id-s
         IAggregate count_dmaier = new CBAggregate(CBCountReduceFunc.AGGR_ID, "dmaier")
                 .get()
@@ -87,5 +90,3 @@ are counted.
         LOG.log(Level.INFO, "count_maier = {0}", count_dmaier.getResult());
         LOG.log(Level.INFO, "count_dostrovsky = {0}", count_dostrovsky.getResult());
 ```
-
-The counting happens in parallel. The synchronization happens implicitely by using Couchbases optimistic concurrency handling (CAS).
