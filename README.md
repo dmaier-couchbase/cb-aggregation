@@ -73,7 +73,7 @@ are counted.
                      .last();
 ```
 
-The counting happens in parallel. The synchronization happens implicitely by using Couchbases optimistic concurrency handling (CAS). The final aggregation result is stored in Couchbase and can be retrieved by using:
+The counting happens in parallel. The synchronization happens implicitely by using Couchbases optimistic concurrency handling (CAS). The final aggregation result is stored in Couchbase. Here an example of retrieving the number of entries for the user 'dmaier' and 'dostrovsky':
 
 ```
         //Read the aggregation result for 2 record id-s
