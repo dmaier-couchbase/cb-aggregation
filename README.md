@@ -1,13 +1,18 @@
 # Aggregation Example
 
-The knowledged reader may think 'Why not just using Spark with Couchbase here?'. Indeed, you could do exactly the same in Hadoop (batch oriented) or with focus on Real-time processing in Spark. But this example should just show you a more lightweighted version which is not using additional frameworks here by working directly with Couchbase's Client Library.
+## Requirements
 
-The purpose here is to retrieve data from a source, stream process by aggregating based on an identifier.
+The purpose here is to:
+
+* Retrieve data from a source stream
+* Stream process by aggregating based on an identifier
 
 * e.g.:
- * User logs in
+ * A user is identified by his 'uid'
  * Identifier is the uid of the user or the session id of a user
  * Count how often the user performed a request
+
+## Implementation Idea
 
 So we need to define how the retrieved record is looking like in the first step (Let's call this an InputSchema):
 
@@ -25,7 +30,7 @@ The stream (to be processed) is then filled with records from multiple sources. 
 
 Based on this we need to define what the Id of the record is. Therefore a Map function is used which enriches the Record with an Id which is a String. So the record is mapped to an Id which is a string:
 
-* IdentifiedRecord MapFunc(Record r)
+* Record MapFunc(Record r)
 
 Based on this Id and other properties we want to perform an aggregation. For this purpose a Reduce function is required. The Reduce Function returns in our example everytime a numeric result (as part of the Aggregate). The aggregation result is stored in Couchbase based on the  previously determined record identifier and an aggregate identifier.
 
@@ -34,5 +39,55 @@ Based on this Id and other properties we want to perform an aggregation. For thi
  * String recordId
  * Double result
 
-* Aggregate ReduceFunc(aggrId, recordId)
+* Aggregate ReduceFunc(Aggregate old, Record record)
+
+## Example
+
+The following example shows how records of the format
+
+```
+dmaier;123-456-789;0.5
+dmaier;123-456-789;0.3
+dmaier;123-456-789;0.4
+dmaier;123-456-789;0.3
+dostrovsky;123-456-789;0.2
+dostrovsky;123-456-789;0.3
+dostrovsky;123-456-789;0.3
+dostrovsky;123-456-789;0.5
+```
+
+are counted.
+
+```java
+ ISchema schema = new Schema();
+        schema.add("uid", Schema.TYPE_STRING);
+        schema.add("token", Schema.TYPE_STRING);
+        schema.add("elapsed", Schema.TYPE_NUM);
+        
+        FileSource fs = new FileSource(TestConstants.FILE, schema);
+                
+        //Perform the aggregation
+        fs.retrieve().map(r -> new IdentifyByUidMapFunc().map(r))
+                     .flatMap(r -> new CBCountReduceFunc().reduce(r))
+                     .toBlocking()
+                     .last();
+        
+        
+        //Read the aggregation result for one record id
+        IAggregate count_dmaier = new CBAggregate(CBCountReduceFunc.AGGR_ID, "dmaier")
+                .get()
+                .toBlocking()
+                .single();
+        
+        IAggregate count_dostrovsky= new CBAggregate(CBCountReduceFunc.AGGR_ID, "dostrovsky")
+                .get()
+                .toBlocking()
+                .single();
+        
+        LOG.log(Level.INFO, "count_maier = {0}", count_dmaier.getResult());
+        LOG.log(Level.INFO, "count_dostrovsky = {0}", count_dostrovsky.getResult());
+        
+        assertEquals("" + 200.0, "" + count_dmaier.getResult());
+        assertEquals("" + 50.0, "" + count_dostrovsky.getResult());
+```
 
