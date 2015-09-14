@@ -24,11 +24,11 @@ import rx.observables.StringObservable;
  */
 public class FileSourceTest {
     
- 
+    
     @Test
     public void testStringObservable() throws Exception {
     
-        File f = new File("/Users/david/Projects/Git/dmaier-couchbase/cb-aggregation/cb-aggregation/src/main/java/test.csv");
+        File f = new File(TestConstants.FILE);
         
         StringObservable.from(new FileReader(f))
                 .flatMap(s -> Observable.from(s.split("\n")))
@@ -48,10 +48,12 @@ public class FileSourceTest {
         schema.add("token", Schema.TYPE_STRING);
         schema.add("elapsed", Schema.TYPE_NUM);
         
-        ISource source = new FileSource("/Users/david/Projects/Git/dmaier-couchbase/cb-aggregation/cb-aggregation/src/main/java/test.csv", schema);
+        ISource source = new FileSource(TestConstants.FILE, schema);
         
         IRecord record = source.retrieve().toBlocking().last();
         
         System.out.println("uid = " + record.get("uid"));
+        
+        assertEquals("dmaier", record.get("uid").toString());
     }
 }

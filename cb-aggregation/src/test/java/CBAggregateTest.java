@@ -5,12 +5,14 @@
  */
 
 import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.error.DocumentDoesNotExistException;
 import com.couchbase.demo.aggregation.conn.BucketFactory;
 import com.couchbase.demo.aggregation.impl.CBAggregate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**
@@ -29,6 +31,16 @@ public class CBAggregateTest {
    
         //Connect
         bucket = BucketFactory.getBucket();
+        
+        //Clean
+        try {
+            bucket.remove("count::dmaier");
+            bucket.remove("count::dostrovsky");
+        } 
+        catch (DocumentDoesNotExistException e)
+        {
+            LOG.warning("Could not remove a nonexistent document");
+        }
     
     }
 
@@ -38,10 +50,13 @@ public class CBAggregateTest {
     
         CBAggregate aggr  = new CBAggregate("count", "dmaier");
         aggr.setResult(5);
-        aggr.persist().toBlocking().single();
+        aggr.create().toBlocking().single();
         
-        LOG.log(Level.INFO, "value = {0}", aggr.get().toBlocking().single().getResult());
-    
+        double result = aggr.get().toBlocking().single().getResult();
+        
+        LOG.log(Level.INFO, "value = {0}", result);
+        
+        assertEquals("" + 5.0, "" + result);
     }
     
     @Test
@@ -49,7 +64,10 @@ public class CBAggregateTest {
     {
         CBAggregate aggr  = new CBAggregate("count", "dostrovsky");
         
-        LOG.log(Level.INFO, "value = {0}", aggr.get().toBlocking().single().getResult());
-
+        double result = aggr.get().toBlocking().single().getResult();
+        
+        LOG.log(Level.INFO, "value = {0}", result );
+        
+        assertEquals("" + 1.0, "" + result);
     }
 }

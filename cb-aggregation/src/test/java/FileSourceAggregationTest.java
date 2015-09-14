@@ -1,4 +1,5 @@
 import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.error.DocumentDoesNotExistException;
 import com.couchbase.demo.aggregation.IAggregate;
 import com.couchbase.demo.aggregation.ISchema;
 import com.couchbase.demo.aggregation.conn.BucketFactory;
@@ -29,7 +30,19 @@ public class FileSourceAggregationTest {
    
         //Connect
         bucket = BucketFactory.getBucket();
-    
+        
+        try
+        {
+            
+            //Remove the old document
+            bucket.remove("count::dmaier");
+            bucket.remove("count::dostrovsky");
+            
+        }
+        catch (DocumentDoesNotExistException e)
+        {
+            LOG.warning("Could not remove a nonexistent document");
+        }
     }
 
   
@@ -42,7 +55,7 @@ public class FileSourceAggregationTest {
         schema.add("token", Schema.TYPE_STRING);
         schema.add("elapsed", Schema.TYPE_NUM);
         
-        FileSource fs = new FileSource("/Users/david/Projects/Git/dmaier-couchbase/cb-aggregation/cb-aggregation/src/main/java/test.csv", schema);
+        FileSource fs = new FileSource(TestConstants.FILE, schema);
                 
         //Perform the aggregation
         fs.retrieve().map(r -> new IdentifyByUidMapFunc().map(r))
@@ -51,13 +64,22 @@ public class FileSourceAggregationTest {
                      .last();
         
         
-        //Read the aggregation resul for one record id
-        IAggregate agg = new CBAggregate(CBCountReduceFunc.AGGR_ID, "dmaier")
+        //Read the aggregation result for one record id
+        IAggregate count_dmaier = new CBAggregate(CBCountReduceFunc.AGGR_ID, "dmaier")
                 .get()
                 .toBlocking()
                 .single();
         
-        LOG.log(Level.INFO, "value = {0}", agg.getResult());
+        IAggregate count_dostrovsky= new CBAggregate(CBCountReduceFunc.AGGR_ID, "dostrovsky")
+                .get()
+                .toBlocking()
+                .single();
+        
+        LOG.log(Level.INFO, "count_maier = {0}", count_dmaier.getResult());
+        LOG.log(Level.INFO, "count_dostrovsky = {0}", count_dostrovsky.getResult());
+        
+        assertEquals("" + 200.0, "" + count_dmaier.getResult());
+        assertEquals("" + 50.0, "" + count_dostrovsky.getResult());
  
     }
     
