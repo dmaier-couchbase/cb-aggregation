@@ -59,7 +59,7 @@ dostrovsky;123-456-789;0.5
 are counted.
 
 ```java
- ISchema schema = new Schema();
+        ISchema schema = new Schema();
         schema.add("uid", Schema.TYPE_STRING);
         schema.add("token", Schema.TYPE_STRING);
         schema.add("elapsed", Schema.TYPE_NUM);
@@ -73,7 +73,7 @@ are counted.
                      .last();
         
         
-        //Read the aggregation result for one record id
+        //Read the aggregation result for 2 record id-s
         IAggregate count_dmaier = new CBAggregate(CBCountReduceFunc.AGGR_ID, "dmaier")
                 .get()
                 .toBlocking()
@@ -86,8 +86,5 @@ are counted.
         
         LOG.log(Level.INFO, "count_maier = {0}", count_dmaier.getResult());
         LOG.log(Level.INFO, "count_dostrovsky = {0}", count_dostrovsky.getResult());
-        
-        assertEquals("" + 200.0, "" + count_dmaier.getResult());
-        assertEquals("" + 50.0, "" + count_dostrovsky.getResult());
 ```
 
