@@ -88,3 +88,4 @@ are counted.
         LOG.log(Level.INFO, "count_dostrovsky = {0}", count_dostrovsky.getResult());
 ```
 
+The counting happens in parallel. The synchronization happens implicitely by using Couchbases optimistic concurrency handling (CAS).
