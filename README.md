@@ -14,7 +14,7 @@ The purpose here is to:
 
 ## Implementation Idea
 
-So we need to define how the retrieved record is looking like in the first step (Let's call this an InputSchema):
+So we need to define how the retrieved record is looking like in the first step (Let's call this a Schema):
 
 * Record
  * Prop 1 : Type_1
