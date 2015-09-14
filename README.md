@@ -21,7 +21,7 @@ So we need to define how the retrieved record is looking like in the first step 
  * ...
  * Prop n : Type_n
 
-We also need to define a Source to retrieve the data from. A source provides records. It's important to allow to combine multiple sources in order to fill a stream for further processing.
+We also need to define a Source to retrieve the data from. A source provides records.
 
 * Source
  * e.g. FileSource
